@@ -1,0 +1,13 @@
+# 扫描输出
+scan-out/
+*.log
+
+# Windows
+Thumbs.db
+desktop.ini
+*.lnk
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
