@@ -1,0 +1,72 @@
+name: PowerShell Lint
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: PSScriptAnalyzer + parse check
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue
+          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force -AllowClobber
+
+      - name: Parse check (all .ps1)
+        shell: pwsh
+        run: |
+          $bad = 0
+          $files = @(Get-ChildItem -Path . -Recurse -Include *.ps1)
+          Write-Host "Found $($files.Count) PowerShell file(s)."
+          foreach ($f in $files) {
+            $errs = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $f.FullName, [ref]$null, [ref]$errs) | Out-Null
+            if ($errs -and $errs.Count -gt 0) {
+              $bad++
+              Write-Host "::error file=$($f.Name),line=$($errs[0].Extent.StartLineNumber)::$($errs[0].Message)"
+            }
+          }
+          if ($bad -gt 0) {
+            Write-Host "::error::$bad file(s) failed to parse."
+            exit 1
+          }
+          Write-Host "All files parsed successfully."
+
+      - name: PSScriptAnalyzer (errors fail the build, warnings are reported)
+        shell: pwsh
+        run: |
+          $files = @(Get-ChildItem -Path . -Recurse -Include *.ps1)
+          $results = @(
+            foreach ($f in $files) {
+              Invoke-ScriptAnalyzer -Path $f.FullName -Severity Error, Warning
+            }
+          )
+
+          if ($results.Count -eq 0) {
+            Write-Host "No issues found."
+            return
+          }
+
+          $results |
+            Select-Object Severity, RuleName, ScriptName, Line, Message |
+            Sort-Object Severity, ScriptName, Line |
+            Format-Table -AutoSize -Wrap |
+            Out-String -Width 200 |
+            Write-Host
+
+          $errors = @($results | Where-Object { $_.Severity -eq 'Error' })
+          if ($errors.Count -gt 0) {
+            Write-Host "::error::$($errors.Count) error-level issue(s) found."
+            exit 1
+          }
+          Write-Host "No error-level issues. $($results.Count) warning(s) reported above."
