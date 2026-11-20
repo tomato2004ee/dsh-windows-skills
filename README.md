@@ -13,6 +13,14 @@
 | [`windows-link-safety`](skills/windows-link-safety/SKILL.md) | 删除前必查 junction / symlink。含一次"删迁移副本把微信删没了"的完整复盘 |
 | [`dsh-profile-recovery`](skills/dsh-profile-recovery/SKILL.md) | DSH Desktop 插件集体消失（memory 等工具返回 unknown tool）时，如何从 health-snapshot 恢复 |
 
+## 文档
+
+| 文档 | 内容 |
+|---|---|
+| [`docs/incident-report.md`](docs/incident-report.md) | **完整事故报告**：一次「清理 C 盘」如何演变成误删微信、破坏开发环境，含五个失误的根因分析、修复步骤与证据附录 |
+
+建议先读事故报告——它解释了为什么这些坑值得写成检查清单。
+
 ## 这些经验从哪来
 
 一次"帮我把 C 盘清理一下"的请求，最终演变成：
