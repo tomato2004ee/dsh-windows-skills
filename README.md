@@ -1,5 +1,7 @@
 # DSH Windows Skills
 
+> English version: [README.en.md](README.en.md)
+
 一套从真实事故中提炼出来的 Windows 运维技能包，面向 **AI Agent 驱动本机 Windows** 的场景。
 
 不是"清理大师"式的技巧合集，而是**把踩过的坑写成检查清单**——每条都对应一次真实的故障或失败尝试。
